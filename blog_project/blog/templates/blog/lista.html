@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+    <head>
+        <title>
+            Mi Blog
+        </title>
+    </head>
+    <body>
+        <h1>
+            Lista de publicaciones
+        </h1>
+        {%for post in posts%}
+            <div>
+                <h2>
+                    {{post.titulo}}
+                </h2>
+                <p>
+                    {{post.fecha_creacion}}
+                </p>
+                <a href="{% url 'detalle_post' post.id %}">
+                    leer mas
+                </a>
+            </div>
+        {% empty %}
+            <p>No hay publicaciones todavía.</p>
+        {% endfor %}
+    </body>
+</html>
