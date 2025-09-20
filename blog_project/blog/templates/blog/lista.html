@@ -20,7 +20,7 @@
                 <a href="{% url 'detalle_post' post.id %}">
                     leer mas
                 </a>
-                
+                <a href="{% url 'editar_post' post.id %}">Editar</a>
             </div>
             <a href="{% url 'crear_post' %}">Crear nuevo post</a>
         {% empty %}
