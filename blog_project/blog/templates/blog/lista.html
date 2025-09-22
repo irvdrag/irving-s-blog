@@ -5,6 +5,19 @@
             Mi Blog
         </title>
     </head>
+    <nav>
+        {% if user.is_authenticated %}
+            <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                    <button type="submit" style="background:none; border:none; color:blue; cursor:pointer;">
+                    Cerrar sesión
+                    </button>
+            </form>
+        {% else %}
+            <a href="{% url 'login' %}">Iniciar sesión</a>
+        {% endif %}
+    </nav>
+    <hr>
     <body>
         <h1>
             Lista de publicaciones
