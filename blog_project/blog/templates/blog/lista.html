@@ -9,6 +9,7 @@
         <h1>
             Lista de publicaciones
         </h1>
+        <a href="{% url 'crear_post' %}">Crear nuevo post</a>
         {%for post in posts%}
             <div>
                 <h2>
@@ -17,12 +18,17 @@
                 <p>
                     {{post.fecha_creacion}}
                 </p>
-                <a href="{% url 'detalle_post' post.id %}">
+                <p>
+                    <a href="{% url 'detalle_post' post.id %}">
                     leer mas
-                </a>
-                <a href="{% url 'editar_post' post.id %}">Editar</a>
+                    </a>
+                </p>
+                <p>
+                    {% if user == post.autor or user.is_staff %}
+                        <a href="{% url 'editar_post' post.id %}">Editar</a>
+                    {% endif %}
+                </p>
             </div>
-            <a href="{% url 'crear_post' %}">Crear nuevo post</a>
         {% empty %}
             <p>No hay publicaciones todavía.</p>
         {% endfor %}
