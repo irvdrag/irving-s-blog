@@ -1,7 +1,9 @@
 from django.shortcuts import render,get_object_or_404,redirect
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from .models import Post
 from .forms import PostForm
+from django.contrib.auth import login
 # Create your views here.
 def lista_posts(request):
     posts=Post.objects.all().order_by('-fecha_creacion')
@@ -38,3 +40,14 @@ def editar_post(request, post_id):
         form = PostForm(instance=post)
 
     return render(request, 'blog/editar_post.html', {'form': form, 'post': post})
+
+def register(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)  # inicia sesión automáticamente después del registro
+            return redirect('lista_posts')  # cambia 'home' por la vista a la que quieras redirigir
+    else:
+        form = UserCreationForm()
+    return render(request, 'registration/register.html', {'form': form})
