@@ -7,8 +7,62 @@
 <body>
     <h1>{{ post.titulo }}</h1>
     <p><strong>Publicado:</strong> {{ post.fecha_creacion }}</p>
+
     <div>
         {{ post.contenido }}
     </div>
+
+    <!-- 🏷️ Mostrar etiquetas asociadas al post -->
+    <p><strong>Etiquetas:</strong>
+        {% for tag in post.tags.all %}
+            <a href="{% url 'posts_por_etiqueta' tag.name %}">{{ tag.name }}</a>{% if not forloop.last %}, {% endif %}
+        {% empty %}
+            Sin etiquetas
+        {% endfor %}
+    </p>
+
+    <hr>
+
+    <!-- 💬 Comentarios -->
+    <h2>Comentarios</h2>
+
+    {% if comentarios %}
+        {% for comentario in comentarios %}
+            <div style="margin-bottom: 15px;">
+                <p><strong>{{ comentario.autor.username }}</strong> dijo:</p>
+                <p>{{ comentario.contenido }}</p>
+                <p><small>{{ comentario.fecha_creacion|date:"d M Y H:i" }}</small></p>
+                {% if user == comentario.autor or user.is_staff %}
+                    <p>
+                        <a href="{% url 'editar_comentario' comentario.id %}">Editar</a> |
+                        <a href="{% url 'eliminar_comentario' comentario.id %}">Eliminar</a>
+                    </p>
+                {% endif %}
+                <hr>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No hay comentarios todavía.</p>
+    {% endif %}
+
+    <!-- 📝 Formulario de nuevo comentario -->
+    {% if user.is_authenticated %}
+        <h3>Agregar un comentario</h3>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Comentar</button>
+        </form>
+    {% else %}
+        <p><a href="{% url 'login' %}">Inicia sesión</a> para comentar.</p>
+    {% endif %}
+
+    <br>
     <a href="{% url 'lista_posts' %}">← Volver a la lista</a>
+    {% if comentario.id %}
+    <a href="{% url 'editar_comentario' comentario.id %}">Editar</a>
+    <a href="{% url 'eliminar_comentario' comentario.id %}">Eliminar</a>
+    {% endif %}
+    
 </body>
+</html>

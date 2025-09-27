@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Confirmar eliminación</title>
+</head>
+<body>
+    <h1>¿Estás seguro que querés eliminar este comentario?</h1>
+
+    <p>{{ comentario.contenido }}</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Sí, eliminar</button>
+        <a href="{% url 'detalle_post' comentario.post.id %}">Cancelar</a>
+    </form>
+</body>
+</html>

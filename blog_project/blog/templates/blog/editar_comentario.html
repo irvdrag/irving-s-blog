@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Editar Comentario</title>
+</head>
+<body>
+    <h1>Editar comentario</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button type="submit">Guardar</button>
+        <a href="{% url 'detalle_post' post_id=comentario.post.id %}">Cancelar</a>
+    </form>
+</body>
+</html>

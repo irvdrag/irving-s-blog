@@ -38,7 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     #personal_apps
-    'blog'
+    'blog',
+    #addoms of django
+    'taggit',
 ]
 
 MIDDLEWARE = [
