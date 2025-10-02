@@ -15,7 +15,7 @@
     <!-- 🏷️ Mostrar etiquetas asociadas al post -->
     <p><strong>Etiquetas:</strong>
         {% for tag in post.tags.all %}
-            <a href="{% url 'posts_por_etiqueta' tag.name %}">{{ tag.name }}</a>{% if not forloop.last %}, {% endif %}
+            <a href="{% url 'posts_by_tag' tag.name %}">{{ tag.name }}</a>{% if not forloop.last %}, {% endif %}
         {% empty %}
             Sin etiquetas
         {% endfor %}
