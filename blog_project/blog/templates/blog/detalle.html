@@ -25,21 +25,25 @@
 
     <!-- 💬 Comentarios -->
     <h2>Comentarios</h2>
-
+    {% if messages %}
+        <ul style="list-style: none; padding: 0;">
+            {% for message in messages %}
+                <li style="
+                background-color: {% if message.tags == 'success' %}#d4edda{% elif message.tags == 'error' %}#f8d7da{% elif message.tags == 'warning' %}#fff3cd{% endif %};
+                border: 1px solid {% if message.tags == 'success' %}#c3e6cb{% elif message.tags == 'error' %}#f5c6cb{% elif message.tags == 'warning' %}#ffeeba{% endif %};
+                color: #000;
+                padding: 10px;
+                margin-bottom: 10px;
+                border-radius: 5px;
+            ">
+                {{ message }}
+                </li>
+         {% endfor %}
+    </ul>
+{% endif %}
     {% if comentarios %}
         {% for comentario in comentarios %}
-            <div style="margin-bottom: 15px;">
-                <p><strong>{{ comentario.autor.username }}</strong> dijo:</p>
-                <p>{{ comentario.contenido }}</p>
-                <p><small>{{ comentario.fecha_creacion|date:"d M Y H:i" }}</small></p>
-                {% if user == comentario.autor or user.is_staff %}
-                    <p>
-                        <a href="{% url 'editar_comentario' comentario.id %}">Editar</a> |
-                        <a href="{% url 'eliminar_comentario' comentario.id %}">Eliminar</a>
-                    </p>
-                {% endif %}
-                <hr>
-            </div>
+            {% include 'blog/comentario.html' with comentario=comentario nivel=0 %}
         {% endfor %}
     {% else %}
         <p>No hay comentarios todavía.</p>

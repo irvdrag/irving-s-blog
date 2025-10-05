@@ -1,0 +1,33 @@
+<div style="margin-left: {{ nivel|default:0 }}px; margin-bottom: 15px;">
+    {% if comentario.bloqueado %}
+        <p><em>Comentario bloqueado</em></p>
+    {% else %}
+        <p><strong>{{ comentario.autor.username }}</strong> dijo:</p>
+        <p>{{ comentario.contenido }}</p>
+        <p><small>{{ comentario.fecha_creacion|date:"d M Y H:i" }}</small></p>
+
+        {% if user == comentario.autor or user.is_staff %}
+            <p>
+                <a href="{% url 'editar_comentario' comentario.id %}">Editar</a> |
+                <a href="{% url 'eliminar_comentario' comentario.id %}">Eliminar</a>
+            </p>
+        {% endif %}
+
+        {% if user.is_authenticated %}
+            <details>
+                <summary>Responder</summary>
+                <form method="post" style="margin-top: 10px;">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <input type="hidden" name="padre_id" value="{{ comentario.id }}">
+                    <button type="submit">Enviar respuesta</button>
+                </form>
+            </details>
+        {% endif %}
+    {% endif %}
+
+    {# Respuestas #}
+    {% for respuesta in comentario.respuestas.all %}
+        {% include 'blog/comentario.html' with comentario=respuesta nivel=nivel|add:20 %}
+    {% endfor %}
+</div>

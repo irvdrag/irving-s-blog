@@ -1,6 +1,7 @@
 from django.shortcuts import render,get_object_or_404,redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.http import HttpResponseForbidden
 from django.db.models import Q
 #de libreria taggit
@@ -25,13 +26,11 @@ def lista_posts(request):
         'query': query  # para mostrar lo que se buscó en el HTML
     })
 
-from django.shortcuts import render, get_object_or_404, redirect
-from .models import Post, Comentario
-from .forms import ComentarioForm
+
 
 def detalle_post(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    comentarios = post.comentarios.all().order_by('-fecha_creacion')  # related_name='comentarios'
+    comentarios = post.comentarios.filter(padre__isnull=True).order_by('-fecha_creacion')
 
     if request.method == 'POST':
         if request.user.is_authenticated:
@@ -40,24 +39,27 @@ def detalle_post(request, post_id):
                 comentario = form.save(commit=False)
                 comentario.autor = request.user
                 comentario.post = post
+
+                # 🔽 ESTA PARTE ES FUNDAMENTAL
+                padre_id = request.POST.get('padre_id')
+                if padre_id:
+                    try:
+                        padre = Comentario.objects.get(id=padre_id)
+                        comentario.padre = padre
+                    except Comentario.DoesNotExist:
+                        pass
+
                 comentario.save()
                 return redirect('detalle_post', post_id=post.id)
         else:
-            return redirect('login')  # si alguien no autenticado intenta comentar
+            return redirect('login')
     else:
         form = ComentarioForm()
 
-    # ✅ Renderizar siempre al final
     return render(request, 'blog/detalle.html', {
         'post': post,
         'comentarios': comentarios,
-        'form': form,
-    })
-
-    return render(request, 'blog/detalle.html', {
-        'post': post,
-        'comentarios': comentarios,
-        'form': form,
+        'form': form
     })
 
 @login_required
@@ -110,18 +112,29 @@ def posts_by_tag(request, tag_slug):
 def editar_comentario(request, comentario_id):
     comentario = get_object_or_404(Comentario, id=comentario_id)
 
+    # 🔒 Solo el autor o staff puede editar
     if request.user != comentario.autor and not request.user.is_staff:
-        return HttpResponseForbidden("No tenés permiso para editar este comentario.")
+        messages.error(request, "No tenés permiso para editar este comentario.")
+        return redirect('detalle_post', post_id=comentario.post.id)
+
+    # 🔒 No permitir editar si el comentario está bloqueado
+    if comentario.bloqueado:
+        messages.warning(request, "Este comentario está bloqueado y no puede ser editado.")
+        return redirect('detalle_post', post_id=comentario.post.id)
 
     if request.method == 'POST':
         form = ComentarioForm(request.POST, instance=comentario)
         if form.is_valid():
             form.save()
+            messages.success(request, "Comentario actualizado correctamente.")
             return redirect('detalle_post', post_id=comentario.post.id)
     else:
         form = ComentarioForm(instance=comentario)
 
-    return render(request, 'blog/editar_comentario.html', {'form': form, 'comentario': comentario})
+    return render(request, 'blog/editar_comentario.html', {
+        'form': form,
+        'comentario': comentario
+    })
 
 @login_required
 def eliminar_comentario(request, comentario_id):

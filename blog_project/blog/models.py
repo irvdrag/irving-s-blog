@@ -19,6 +19,11 @@ class Comentario(models.Model):
     contenido = models.TextField()
     fecha_creacion = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f'{self.autor.username} comentó en "{self.post.titulo}"' 
+    # Nuevo: relación recursiva para permitir respuestas
+    padre = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='respuestas')
 
+    # Nuevo: para poder bloquear comentarios
+    bloqueado = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f'{self.autor.username} comentó en "{self.post.titulo}"'
