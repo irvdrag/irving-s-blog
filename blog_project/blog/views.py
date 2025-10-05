@@ -2,6 +2,7 @@ from django.shortcuts import render,get_object_or_404,redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
+from django.db.models import Q
 #de libreria taggit
 from taggit.models import Tag
 from .models import Post,Comentario
@@ -9,8 +10,20 @@ from .forms import PostForm,ComentarioForm
 from django.contrib.auth import login
 # Create your views here.
 def lista_posts(request):
-    posts=Post.objects.all().order_by('-fecha_creacion')
-    return render(request,'blog/lista.html',{'posts':posts})
+    query = request.GET.get('q')  # capturamos la búsqueda
+    if query:
+        posts = Post.objects.filter(
+            Q(titulo__icontains=query) |
+            Q(contenido__icontains=query) |
+            Q(tags__name__icontains=query)
+        ).distinct().order_by('-fecha_creacion')
+    else:
+        posts = Post.objects.all().order_by('-fecha_creacion')
+
+    return render(request, 'blog/lista.html', {
+        'posts': posts,
+        'query': query  # para mostrar lo que se buscó en el HTML
+    })
 
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Post, Comentario
@@ -123,3 +136,5 @@ def eliminar_comentario(request, comentario_id):
         return redirect('detalle_post', post_id=post_id)
 
     return render(request, 'blog/confirmar_eliminacion.html', {'comentario': comentario})
+
+

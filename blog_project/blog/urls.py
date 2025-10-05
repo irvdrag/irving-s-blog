@@ -14,6 +14,5 @@ urlpatterns = [
     #rutas de modificacion de comentarios 
     path('comentario/<int:comentario_id>/editar/', views.editar_comentario, name='editar_comentario'),
     path('comentario/<int:comentario_id>/eliminar/', views.eliminar_comentario, name='eliminar_comentario'),
-    
 
 ]

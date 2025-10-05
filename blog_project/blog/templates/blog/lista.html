@@ -58,9 +58,17 @@
             <a href="{% url 'login' %}">Iniciar sesión</a>
             <a href="{% url 'register' %}">Crear usuario</a>
         {% endif %}
+        <h1>Lista de Posts</h1>
+            <form action="{% url 'lista_posts' %}" method="get">
+                <input type="text" name="q" placeholder="Buscar posts..." value="{{ query|default:'' }}">
+                <button type="submit">Buscar</button>
+            </form>
     </nav>
 
     <h1>Lista de publicaciones</h1>
+    {% if query %}
+        <h2>Resultados para "{{ query }}"</h2>
+    {% endif %}
     <p><a href="{% url 'crear_post' %}">+ Crear nuevo post</a></p>
 
     {% for post in posts %}
@@ -86,7 +94,10 @@
             </p>
         </div>
     {% empty %}
-        <p>No hay publicaciones todavía.</p>
-    {% endfor %}
-</body>
+        {% if query %}
+            <p>No se encontraron publicaciones para "{{ query }}".</p>
+        {% else %}
+            <p>No hay publicaciones todavía.</p>
+        {% endif %}
+{% endfor %}
 </html>
