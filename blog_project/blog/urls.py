@@ -1,6 +1,8 @@
 from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
+from django.conf import settings
+from django.conf.urls.static import static
 urlpatterns = [
     path('', views.lista_posts, name='lista_posts'),
     path('post/<int:post_id>/', views.detalle_post, name='detalle_post'),
@@ -16,3 +18,5 @@ urlpatterns = [
     path('comentario/<int:comentario_id>/eliminar/', views.eliminar_comentario, name='eliminar_comentario'),
 
 ]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

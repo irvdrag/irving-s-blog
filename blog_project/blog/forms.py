@@ -1,5 +1,15 @@
 from django import forms
-from .models import Post,Comentario
+from .models import Post,Comentario,ImagenPost
+from django.forms import modelformset_factory
+from django import forms
+
+class ImagenPostForm(forms.ModelForm):
+    class Meta:
+        model = ImagenPost
+        fields = ['imagen', 'descripcion']
+        widgets = {
+            'descripcion': forms.TextInput(attrs={'placeholder': 'Descripción opcional'}),
+        }
 
 class PostForm(forms.ModelForm):
     class Meta:
@@ -10,6 +20,9 @@ class PostForm(forms.ModelForm):
                 'placeholder': 'Escribe etiquetas separadas por comas, ej: python, django, tutorial'
             }),
         }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['tags'].required = False  # 🔽 Esto garantiza que no sea obligatorio
 
     def clean_titulo(self):
         titulo = self.cleaned_data.get('titulo')
@@ -30,3 +43,5 @@ class ComentarioForm(forms.ModelForm):
         labels = {
             'contenido': '',
         }
+
+ImagenPostFormSet = modelformset_factory(ImagenPost, fields=('imagen', 'descripcion'), extra=3, can_delete=True)

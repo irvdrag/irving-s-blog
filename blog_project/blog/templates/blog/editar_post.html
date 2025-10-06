@@ -1,15 +1,44 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
+    <meta charset="UTF-8">
     <title>Editar Post</title>
 </head>
 <body>
     <h1>Editar publicación</h1>
-    <form method="post">
+
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
+
+        <h3>Datos del post</h3>
         {{ form.as_p }}
+
+        <hr>
+        <h3>Imágenes asociadas</h3>
+        {{ formset.management_form }}
+
+        {% for imagen_form in formset %}
+            <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
+        {{ imagen_form.as_p }}
+
+        {% if imagen_form.instance.imagen %}
+            <p><strong>Imagen actual:</strong></p>
+            <img src="{{ imagen_form.instance.imagen.url }}" alt="Imagen" style="max-width: 200px;"><br>
+        {% endif %}
+
+        {% if imagen_form.DELETE %}
+            <label>
+                {{ imagen_form.DELETE }} Eliminar esta imagen
+            </label>
+        {% endif %}
+        </div>
+    {% endfor %}
+
+
         <button type="submit">Guardar cambios</button>
     </form>
-    <a href="{% url 'lista_posts' %}">Volver a la lista</a>
+
+    <br>
+    <a href="{% url 'detalle_post' post.id %}">← Volver al post</a>
 </body>
 </html>

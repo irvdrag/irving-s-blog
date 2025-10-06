@@ -6,9 +6,20 @@ from django.http import HttpResponseForbidden
 from django.db.models import Q
 #de libreria taggit
 from taggit.models import Tag
-from .models import Post,Comentario
-from .forms import PostForm,ComentarioForm
+from .models import Post,Comentario,ImagenPost
+from .forms import PostForm,ComentarioForm,ImagenPostForm
+from django.forms import modelformset_factory
 from django.contrib.auth import login
+
+ImagenPostFormSet = modelformset_factory(
+    ImagenPost,
+    form=ImagenPostForm,
+    extra=3,
+    can_delete=True
+)
+
+
+
 # Create your views here.
 def lista_posts(request):
     query = request.GET.get('q')  # capturamos la búsqueda
@@ -62,34 +73,67 @@ def detalle_post(request, post_id):
         'form': form
     })
 
+
 @login_required
 def crear_post(request):
+    ImagenPostFormSet = modelformset_factory(ImagenPost, form=ImagenPostForm, extra=3)
+
     if request.method == 'POST':
         form = PostForm(request.POST)
-        if form.is_valid():
-            nuevo_post = form.save(commit=False)
-            nuevo_post.autor = request.user  # ✅ Asigna el autor
-            nuevo_post.save()
-            form.save_m2m() 
+        formset = ImagenPostFormSet(request.POST, request.FILES, queryset=ImagenPost.objects.none())
+
+        if form.is_valid() and formset.is_valid():
+            post = form.save(commit=False)
+            post.autor = request.user
+            post.save()
+            form.save_m2m()
+
+            for form_imagen in formset.cleaned_data:
+                if form_imagen and not form_imagen.get('DELETE', False):
+                    ImagenPost.objects.create(
+                        post=post,
+                        imagen=form_imagen['imagen'],
+                        descripcion=form_imagen.get('descripcion', '')
+                    )
+
             return redirect('lista_posts')
     else:
         form = PostForm()
-    
-    return render(request, 'blog/crear_post.html', {'form': form})
+        formset = ImagenPostFormSet(queryset=ImagenPost.objects.none())
+
+    return render(request, 'blog/crear_post.html', {
+        'form': form,
+        'formset': formset
+    })
 
 @login_required
+
 def editar_post(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-
+    ImagenPostFormSet = modelformset_factory(ImagenPost, form=ImagenPostForm, extra=3, can_delete=True)
+    
     if request.method == 'POST':
         form = PostForm(request.POST, instance=post)
-        if form.is_valid():
+        formset = ImagenPostFormSet(request.POST, request.FILES, queryset=ImagenPost.objects.filter(post=post))
+        
+        if form.is_valid() and formset.is_valid():
             form.save()
+            
+            # Guardar imágenes y procesar borrados
+            for form_imagen in formset:
+                if form_imagen.cleaned_data.get('DELETE') and form_imagen.instance.pk:
+                    form_imagen.instance.delete()
+                elif form_imagen.cleaned_data and not form_imagen.cleaned_data.get('DELETE'):
+                    imagen = form_imagen.save(commit=False)
+                    imagen.post = post
+                    imagen.save()
+            
             return redirect('lista_posts')
     else:
         form = PostForm(instance=post)
+        formset = ImagenPostFormSet(queryset=ImagenPost.objects.filter(post=post))
 
-    return render(request, 'blog/editar_post.html', {'form': form, 'post': post})
+    return render(request, 'blog/editar_post.html', {'form': form, 'formset': formset, 'post': post})
 
 def register(request):
     if request.method == 'POST':
@@ -106,7 +150,7 @@ def register(request):
 def posts_by_tag(request, tag_slug):
     tag = get_object_or_404(Tag, slug=tag_slug)
     posts = Post.objects.filter(tags__in=[tag])
-    return render(request, 'blog/posts_by_tag.html', {'tag': tag, 'posts': posts})
+    return render(request, 'blog/lista.html', {'tag': tag, 'posts': posts})
 
 @login_required
 def editar_comentario(request, comentario_id):

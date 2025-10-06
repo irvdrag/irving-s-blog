@@ -1,15 +1,94 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
+    <meta charset="UTF-8">
     <title>Crear nuevo post</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        h1, h3 {
+            color: #333;
+        }
+        form div {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background: #fff;
+            border-radius: 5px;
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #28a745;
+            border: none;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        a {
+            display: inline-block;
+            margin-top: 15px;
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .errors {
+            color: red;
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
 <body>
     <h1>Nuevo post</h1>
-    <form method="post">
+
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
+
+        <h3>Información del post</h3>
+
+        {% if form.errors %}
+            <div class="errors">
+                {{ form.errors }}
+            </div>
+        {% endif %}
         {{ form.as_p }}
+
+        <hr>
+
+        <h3>Imágenes</h3>
+
+        {% if formset.non_form_errors %}
+            <div class="errors">
+                {{ formset.non_form_errors }}
+            </div>
+        {% endif %}
+
+        {{ formset.management_form }}
+
+        {% for imagen_form in formset %}
+            <div>
+                {{ imagen_form.as_p }}
+                {% if imagen_form.instance.pk %}
+                    <label>
+                        {{ imagen_form.DELETE }} Eliminar imagen
+                    </label>
+                {% endif %}
+            </div>
+        {% endfor %}
+
         <button type="submit">Guardar</button>
     </form>
-    <a href="{% url 'lista_posts' %}">Volver a la lista</a>
+
+    <a href="{% url 'lista_posts' %}">← Volver a la lista</a>
 </body>
 </html>
