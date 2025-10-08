@@ -1,4 +1,3 @@
-<!-- blog/templates/blog/detalle.html -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,31 +6,33 @@
 <body>
     <h1>{{ post.titulo }}</h1>
     <p><strong>Publicado:</strong> {{ post.fecha_creacion }}</p>
+
     {% if post.imagenes.all %}
         <div style="margin-top: 20px;">
             <h3>Imágenes</h3>
             {% for imagen in post.imagenes.all %}
                 <div style="margin-bottom: 15px;">
-                <img src="{{ imagen.imagen.url }}" alt="{{ imagen.descripcion }}" style="max-width: 100%; height: auto;">
-                {% if imagen.descripcion %}
-                    <p><em>{{ imagen.descripcion }}</em></p>
-                {% endif %}
+                    <img src="{{ imagen.imagen.url }}" alt="{{ imagen.descripcion }}" style="max-width: 100%; height: auto;">
+                    {% if imagen.descripcion %}
+                        <p><em>{{ imagen.descripcion }}</em></p>
+                    {% endif %}
                 </div>
             {% endfor %}
         </div>
     {% endif %}
+
     <div>
         {{ post.contenido }}
     </div>
 
     <!-- 🏷️ Mostrar etiquetas asociadas al post -->
-    <p><strong>Etiquetas:</strong>
-        {% for tag in post.tags.all %}
-            <a href="{% url 'posts_by_tag' tag.name %}">{{ tag.name }}</a>{% if not forloop.last %}, {% endif %}
-        {% empty %}
-            Sin etiquetas
-        {% endfor %}
-    </p>
+<p><strong>Etiquetas:</strong>
+    {% for tag in tags %}
+        <a href="{% url 'posts_by_tag' tag.slug %}">{{ tag.name }}</a>{% if not forloop.last %}, {% endif %}
+    {% empty %}
+        Sin etiquetas
+    {% endfor %}
+</p> 
 
     <hr>
 
@@ -41,18 +42,19 @@
         <ul style="list-style: none; padding: 0;">
             {% for message in messages %}
                 <li style="
-                background-color: {% if message.tags == 'success' %}#d4edda{% elif message.tags == 'error' %}#f8d7da{% elif message.tags == 'warning' %}#fff3cd{% endif %};
-                border: 1px solid {% if message.tags == 'success' %}#c3e6cb{% elif message.tags == 'error' %}#f5c6cb{% elif message.tags == 'warning' %}#ffeeba{% endif %};
-                color: #000;
-                padding: 10px;
-                margin-bottom: 10px;
-                border-radius: 5px;
-            ">
-                {{ message }}
+                    background-color: {% if message.tags == 'success' %}#d4edda{% elif message.tags == 'error' %}#f8d7da{% elif message.tags == 'warning' %}#fff3cd{% endif %};
+                    border: 1px solid {% if message.tags == 'success' %}#c3e6cb{% elif message.tags == 'error' %}#f5c6cb{% elif message.tags == 'warning' %}#ffeeba{% endif %};
+                    color: #000;
+                    padding: 10px;
+                    margin-bottom: 10px;
+                    border-radius: 5px;
+                ">
+                    {{ message }}
                 </li>
-         {% endfor %}
-    </ul>
-{% endif %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+
     {% if comentarios %}
         {% for comentario in comentarios %}
             {% include 'blog/comentario.html' with comentario=comentario nivel=0 %}
@@ -70,20 +72,15 @@
             <button type="submit">Comentar</button>
         </form>
     {% else %}
-        <p><strong>Etiquetas:</strong>
-    {% for tag in post.tags.all %}
-        <a href="{% url 'posts_by_tag' tag.slug %}">{{ tag.name }}</a>{% if not forloop.last %}, {% endif %}
-    {% empty %}
-        Sin etiquetas
-    {% endfor %}
-</p>
+        <p><em>Debes iniciar sesión para comentar.</em></p>
     {% endif %}
 
     <br>
     <a href="{% url 'lista_posts' %}">← Volver a la lista</a>
+
     {% if comentario.id %}
-    <a href="{% url 'editar_comentario' comentario.id %}">Editar</a>
-    <a href="{% url 'eliminar_comentario' comentario.id %}">Eliminar</a>
+        <a href="{% url 'editar_comentario' comentario.id %}">Editar</a>
+        <a href="{% url 'eliminar_comentario' comentario.id %}">Eliminar</a>
     {% endif %}
     
 </body>

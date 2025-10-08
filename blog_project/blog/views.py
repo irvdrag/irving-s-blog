@@ -42,6 +42,7 @@ def lista_posts(request):
 def detalle_post(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     comentarios = post.comentarios.filter(padre__isnull=True).order_by('-fecha_creacion')
+    tags = post.tags.all()  # ✅ AÑADIDO
 
     if request.method == 'POST':
         if request.user.is_authenticated:
@@ -51,7 +52,6 @@ def detalle_post(request, post_id):
                 comentario.autor = request.user
                 comentario.post = post
 
-                # 🔽 ESTA PARTE ES FUNDAMENTAL
                 padre_id = request.POST.get('padre_id')
                 if padre_id:
                     try:
@@ -70,7 +70,8 @@ def detalle_post(request, post_id):
     return render(request, 'blog/detalle.html', {
         'post': post,
         'comentarios': comentarios,
-        'form': form
+        'form': form,
+        'tags': tags  # ✅ AÑADIDO
     })
 
 
